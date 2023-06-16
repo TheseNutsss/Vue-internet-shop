@@ -47,13 +47,16 @@ export default {
 }
 html,body{
   height: 100vh;
-  background-color: #EDEFF2;
+  background: rgb(26, 26, 26);
   width: 100%;
 }
 #app{
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+.main{
+  background-color: #EDEFF2;
 }
 @media (min-width: 769px){
   .main{
