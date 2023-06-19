@@ -168,7 +168,7 @@ export default {
 
 <template>
   <div class="wrapp-shadow" :class="{shadow: isMobileFiltersOpen}"></div>
-  <div class="filter-icon-wrapper" @click="toggleMobileFilters"><img src="@/images/filter-icon.png"/></div>
+  <div class="filter-icon-wrapper" @click="toggleMobileFilters"><img src="@/assets/images/filter-icon.png"/></div>
   <div class="filter-area-wrapper" :class="{'mobile-filters-bar' : isMobileFiltersOpen}">
     <span class="close-mobile-filters-icon" @click="toggleMobileFilters">✕</span>
     <div class="usedFilters" @click="deleteUsedFilters" v-if="$store.state.filteredProducts.length"><my-button>Cбросить все фильтры</my-button></div>
