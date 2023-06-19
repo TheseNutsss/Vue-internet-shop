@@ -32,7 +32,7 @@
                 </div>
                 
                 <div class="mob_col2">
-                    <a href="/"><img src="@/images/logo.png" width="88" height="44"/></a>
+                    <a href="/"><img src="@/assets/images/logo.png" width="88" height="44"/></a>
                 </div>
                 <div class="mob_col3">
                     <div class="icons-wrapper">
@@ -77,7 +77,7 @@
                     <div class="header-middle-wrapper">
                         <div class="column logo">
                             <a href="/" class="logo-link"></a>
-                            <img src="@/images/logo.png"/>
+                            <img src="@/assets/images/logo.png"/>
                         </div>
                         <div class="column column-double">
                             <ul class="middle_menu">

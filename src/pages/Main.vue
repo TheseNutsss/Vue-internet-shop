@@ -4,7 +4,7 @@
 
 <template>
 <div class="banner-wrapper">
-    <img src="@/images/banner.jpg" alt="banner image" usemap="#image-map"/>
+    <img src="@/assets/images/banner.jpg" alt="banner image" usemap="#image-map"/>
 </div>
     
 

@@ -2,9 +2,9 @@
     <footer class="footer">
         <div class="container">
             <div class="footer_columns">
-                <div class="footer_col footer_col--double footer-logo"><a href="/"><img src="@/images/logo.png"/></a></div>
+                <div class="footer_col footer_col--double footer-logo"><a href="/"><img src="@/assets/images/logo.png"/></a></div>
                 <div class="footer_col footer_col2">
-                    <span class="span_footer" @click.stop="openFooterCatalog">Каталог <div v-if="!isOpen"><img src="@/images/downArrow.png"/></div><div v-else><img src="@/images/upArrow.png"/></div></span>
+                    <span class="span_footer" @click.stop="openFooterCatalog">Каталог <div v-if="!isOpen"><img src="@/assets/images/downArrow.png"/></div><div v-else><img src="@/assets/images/upArrow.png"/></div></span>
                     <ul class="footer_menu">
                         <li><a @click="$router.push('/catalog/generatory'); openFooterCatalog()">Генераторы</a></li>
                         <li><a>ИБП</a></li>
