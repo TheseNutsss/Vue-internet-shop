@@ -46,9 +46,8 @@ export default {
   -webkit-text-size-adjust: 100%;
 }
 html,body{
-  height: 100vh;
   background: rgb(26, 26, 26);
-  width: 100%;
+  position: relative;
 }
 #app{
   min-height: 100%;
@@ -110,5 +109,8 @@ html,body{
 .main-heading{
   margin: 10px 0 10px 0;
   font-size: 32px;
+}
+.main-text{
+  padding: 20px;
 }
 </style>

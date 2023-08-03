@@ -22,7 +22,7 @@ export default {
 <div class="container">
     <h2>Личный кабинет</h2>
      <div class="user-profile">
-      <img src="@/assets/images/default-avatar.png" alt="Profile Picture">
+      <img src="@/assets/default-avatar.png" alt="Profile Picture">
       <div class="user-details">
         <h2>{{$store.state.auth.userCredentials.displayName}}</h2>
         <p class="email">{{$store.state.auth.userCredentials.email}}</p>

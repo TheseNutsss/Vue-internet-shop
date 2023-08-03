@@ -1,18 +1,18 @@
 <template>
     <header class="header">
-            <div v-if="isMenuOpen" class="mobile-side-nav-wrapper">
-                <div class="mobile_side_nav" :class="{responsive: isMenuOpen}">
-                    <div class="mob_side_nav_top"><span @click="toggleNav" class="btn_close">✕</span>
+            <div v-if="isMenuOpen" class="mobile-side-nav-wrapper" ref="mobileSideNavOverlay" @click="isMenuOpen = !isMenuOpen">
+                <div class="mobile_side_nav" :class="{responsive: isMenuOpen}" ref="mobileSideNav">
+                    <div class="mob_side_nav_top"><span @click.stop="toggleNav" class="btn_close">✕</span>
                     <p class="mob_side_nav_top_center">Solaris</p></div>
-                    <ul class="mob_menu_katalog" @click="toggleNav">
+                    <ul class="mob_menu_katalog" @click.stop="toggleNav">
                         <li @click="$router.push('/catalog')">Каталог</li>
                         <li @click="$router.push('/catalog/generatory')">Генераторы</li>
                         <li>ИБП</li>
                         <li>Стабилизаторы</li>
                         <li @click="$router.push('/catalog/powerbanks')">Павербанки</li> 
                     </ul>
-                    <ul class="mob_menu_top">
-                        <li @click="$router.push('/about')">Про нас</li>
+                    <ul class="mob_menu_top" @click.stop="toggleNav">
+                        <li @click="$router.push('/about')">О нас</li>
                         <li @click="$router.push('/shipmentAndPayment')">Оплата и доставка</li>
                         <li @click="$router.push('/exchangeAndReturn')">Обмен и возврат</li>
                         <li @click="$router.push('/contactInfo')">Контактная информация</li>
@@ -32,7 +32,7 @@
                 </div>
                 
                 <div class="mob_col2">
-                    <a href="/"><img src="@/assets/images/logo.png" width="88" height="44"/></a>
+                    <a href="/"><img src="@/assets/logo.png" width="88" height="44"/></a>
                 </div>
                 <div class="mob_col3">
                     <div class="icons-wrapper">
@@ -77,7 +77,7 @@
                     <div class="header-middle-wrapper">
                         <div class="column logo">
                             <a href="/" class="logo-link"></a>
-                            <img src="@/assets/images/logo.png"/>
+                            <img src="@/assets/logo.png"/>
                         </div>
                         <div class="column column-double">
                             <ul class="middle_menu">
@@ -104,7 +104,6 @@ export default {
     },
     methods: {
         toggleNav(){
-            console.log("+")
             this.isMenuOpen = !this.isMenuOpen
         }
     },

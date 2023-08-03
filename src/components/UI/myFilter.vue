@@ -150,9 +150,6 @@ export default {
     },
     '$store.state.filter': {
       handler(){
-        /* if(this.filter.category.length || this.filter.subcategory.length || this.filter.priceFrom || this.filter.priceTo){
-          this.$store.dispatch('filter', this.filter)
-        } */
         this.$store.dispatch('filter', this.$store.state.filter)
       },
       deep: true
@@ -167,11 +164,13 @@ export default {
 </script>
 
 <template>
-  <div class="wrapp-shadow" :class="{shadow: isMobileFiltersOpen}"></div>
-  <div class="filter-icon-wrapper" @click="toggleMobileFilters"><img src="@/assets/images/filter-icon.png"/></div>
+<teleport to="body">
+  <div class="overlay" :class="{overlayIsOn: isMobileFiltersOpen}" @click="toggleMobileFilters"></div>
+</teleport>
+  <div class="filter-icon-wrapper" @click.stop="toggleMobileFilters"><img src="@/assets/filter-icon.png"/></div>
   <div class="filter-area-wrapper" :class="{'mobile-filters-bar' : isMobileFiltersOpen}">
-    <span class="close-mobile-filters-icon" @click="toggleMobileFilters">✕</span>
-    <div class="usedFilters" @click="deleteUsedFilters" v-if="$store.state.filteredProducts.length"><my-button>Cбросить все фильтры</my-button></div>
+    <span class="close-mobile-filters-icon" @click.stop="toggleMobileFilters">✕</span>
+    <div class="usedFilters" @click.stop="deleteUsedFilters" v-if="$store.state.filteredProducts.length"><my-button>Cбросить все фильтры</my-button></div>
     <h2>Фильтры</h2>
     <div class="filter-price">
           <div class="filter-input-price-wrapper">
@@ -220,8 +219,20 @@ export default {
 </template>
 
 <style>
-.wrapp-shadow{
+.overlay{
   display: none;
+}
+.overlayIsOn{
+  position: absolute;
+  display:flex;
+  width:100%;
+  height:100%;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.5);
+  z-index:100;
+  left: 0;
+  top: 0;
 }
 .filter-input-price-wrapper,.filter-price-range-wrapper {
   display: flex;
@@ -362,16 +373,6 @@ input[type="range"]::-moz-slider-thumb{
   display: none;
   z-index: 7;
 }
-.shadow{
-  position: absolute;
-  display:flex;
-  width:100%;
-  height:100%;
-  justify-content:center;
-  align-items:center;
-  background:rgba(0,0,0,.5);
-  z-index:100;
-}
 @media (max-width: 1200px){
   .filter-area-wrapper{
     display: none;
@@ -393,7 +394,7 @@ input[type="range"]::-moz-slider-thumb{
   .mobile-filters-bar{
     height: 100%;
     position: fixed;
-    z-index: 100;
+    z-index: 101;
     top: 0;
     right: 0;
     background-color: #FFFFFF;
@@ -402,11 +403,11 @@ input[type="range"]::-moz-slider-thumb{
     display: inline;
     margin-right: 0;
   }
-   @media (max-width: 450px){
-        .mobile-filters-bar {
-            width: 100%;
-        }
+  @media (max-width: 450px){
+    .mobile-filters-bar {
+        width: 100%;
     }
+  }
   .close-mobile-filters-icon{
     display: block;
     position: absolute;

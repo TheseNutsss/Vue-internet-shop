@@ -2,9 +2,9 @@
     <footer class="footer">
         <div class="container">
             <div class="footer_columns">
-                <div class="footer_col footer_col--double footer-logo"><a href="/"><img src="@/assets/images/logo.png"/></a></div>
+                <div class="footer_col footer_col--double footer-logo"><a href="/"><img src="@/assets/logo.png"/></a></div>
                 <div class="footer_col footer_col2">
-                    <span class="span_footer" @click.stop="openFooterCatalog">Каталог <div v-if="!isOpen"><img src="@/assets/images/downArrow.png"/></div><div v-else><img src="@/assets/images/upArrow.png"/></div></span>
+                    <span class="span_footer" @click.stop="openFooterCatalog">Каталог <div v-if="!isOpen"><img src="@/assets/downArrow.png"/></div><div v-else><img src="@/assets/upArrow.png"/></div></span>
                     <ul class="footer_menu">
                         <li><a @click="$router.push('/catalog/generatory'); openFooterCatalog()">Генераторы</a></li>
                         <li><a>ИБП</a></li>
@@ -49,7 +49,7 @@ export default {
     openFooterCatalog(e){
         if(screen.width <= 768){
         this.isOpen = !this.isOpen
-        this.isOpen ? document.querySelector('.footer_col2 .footer_menu').style.display = "inline" : document.querySelector('.footer_col2 .footer_menu').style.display = "none"
+        this.isOpen ? document.querySelector('.footer_col2 .footer_menu').classList.add("showMobileMenu") : document.querySelector('.footer_col2 .footer_menu').classList.remove("showMobileMenu")
         }
     }
   }
@@ -58,6 +58,9 @@ export default {
 
 <style>
 /*Footer*/
+.showMobileMenu{
+    display: inline !important;
+}
 .footer {
     background: rgb(26, 26, 26);
     color: rgb(255, 255, 255);
@@ -138,7 +141,7 @@ export default {
     .responsive{
         display: block;
     }
-    .footer_col2 ul{
+    .footer_col2 .footer_menu{
         display: none;
     }
 }

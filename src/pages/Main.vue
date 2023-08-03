@@ -4,7 +4,7 @@
 
 <template>
 <div class="banner-wrapper">
-    <img src="@/assets/images/banner.jpg" alt="banner image" usemap="#image-map"/>
+    <img src="@/assets/banner.jpg" alt="banner image" usemap="#image-map"/>
 </div>
     
 
@@ -15,16 +15,20 @@
 </template>
 
 <style scoped>
-.banner-wrapper img{
+.banner-wrapper{
     width: 100%;
-    height: 100%;
-    background-size: cover;
     display: flex;
 }
-@media screen and (max-width: 968px) {
-.banner-wrapper{
-    height: 30vh;
+.banner-wrapper img{
+    width: 100%;
+    object-fit: fill;
+    background-repeat: no-repeat;
+    background-position: center;
 }
+@media screen and (max-width: 968px) {
+    .banner-wrapper{
+        min-height: 200px;
+    }
 }
 
 
