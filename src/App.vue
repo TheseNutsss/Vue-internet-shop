@@ -1,15 +1,17 @@
 <script>
-import { RouterLink, RouterView } from 'vue-router';
-
+import {mapActions, mapMutations} from "vuex"
 export default {
+  methods: {
+    ...mapActions(['productList', 'catalog']),
+    ...mapMutations(['SET_CART', 'SET_WISHLIST', 'SET_COMPARELIST', 'SET_AUTH'])
+  },
   watch: {
     $route(){
       if(this.$route.params.hasOwnProperty('category')|| this.$route.params.hasOwnProperty('subcategory') || this.$route.params.hasOwnProperty('id') || this.$route.params.hasOwnProperty('catalog')){
-        console.log(this.$route.params)
         if(this.$route.params.hasOwnProperty('catalog')){
-          this.$store.dispatch('catalog')
+          this.catalog()
         } else {
-          this.$store.dispatch('productList', this.$route.params)
+          this.productList(this.$route.params)
         }
       }
     },
@@ -18,10 +20,10 @@ export default {
     }
   },
   mounted(){
-    localStorage.getItem('cart') ? this.$store.commit('SET_CART', localStorage.getItem('cart')) : ''
-    localStorage.getItem('wishlist') ? this.$store.commit('SET_WISHLIST', localStorage.getItem('wishlist')) : ''
-    localStorage.getItem('comparelist') ? this.$store.commit('SET_COMPARELIST', localStorage.getItem('comparelist')) : ''
-    sessionStorage.getItem('auth') ? this.$store.commit('SET_AUTH', sessionStorage.getItem('auth')) : ''
+    localStorage.getItem('cart') ? this.SET_CART(localStorage.getItem('cart')) : ''
+    localStorage.getItem('wishlist') ? this.SET_WISHLIST(localStorage.getItem('wishlist')) : ''
+    localStorage.getItem('comparelist') ? this.SET_COMPARELIST(localStorage.getItem('comparelist')) : ''
+    sessionStorage.getItem('auth') ? this.SET_AUTH(sessionStorage.getItem('auth')) : ''
     }
 }
 </script>
@@ -49,6 +51,9 @@ html,body{
   background: rgb(26, 26, 26);
   position: relative;
 }
+body{
+  height: 100vh;
+}
 #app{
   min-height: 100%;
   display: flex;
@@ -59,7 +64,7 @@ html,body{
 }
 @media (min-width: 769px){
   .main{
-    flex: 1 1;
+    flex: 1 1 auto;
   }
 }
 @media (max-width: 1200px){

@@ -1,42 +1,43 @@
 export default {
     state: {
-       
+        sortOption: "default",
     },
     mutations: {
-        SET_SORTED_PRODUCTS(context, products){
-            this.state.sortedProducts = products
+        SET_SORT_OPTION(state, option){
+            state.sortOption = option
         }
     },
     actions: {
-        SORT_PRODUCTS(context, criteria){
+        SORT_PRODUCTS({rootState, state, commit}, criteria){
             let sortedProducts
             switch (criteria) {
                 case "default":
                     //console.log("default")  
-                    sortedProducts = []
+                    sortedProducts = rootState.filters.originalOrderProducts
                     break;
                 case "priceAsc":
                     //console.log("priceAsc")
-                    if(this.state.filteredProducts.length){
-                        sortedProducts = Array.from(this.state.filteredProducts)
-                    } else {
-                        sortedProducts = Array.from(this.state.showedProducts)
-                    }                 
+                    if(rootState.filters.filteredProducts.length){
+                        sortedProducts = Array.from(rootState.filters.filteredProducts)
+                    }/*  else {
+                        sortedProducts = Array.from(rootState.showedProducts)
+                    }  */                
                     sortedProducts.sort((a, b) => a.price > b.price ? 1 : -1)
                 break;
                 case "priceDsc":
                     //console.log("priceDsc")
-                    if(this.state.filteredProducts.length){
-                        sortedProducts = Array.from(this.state.filteredProducts)
-                    } else {
-                        sortedProducts = Array.from(this.state.showedProducts)
-                    }
+                    if(rootState.filters.filteredProducts.length){
+                        sortedProducts = Array.from(rootState.filters.filteredProducts)
+                    } /* else {
+                        sortedProducts = Array.from(rootState.showedProducts)
+                    } */
                     sortedProducts.sort((a, b) => a.price < b.price ? 1 : -1)
                 break;
             }
-            if(sortedProducts.length || this.state.sortedProducts.length){
+            if(sortedProducts.length || state.sortedProducts.length){
                 //console.log(sortedProducts, this.state.sortedProducts)
-            context.commit('SET_SORTED_PRODUCTS', sortedProducts)
+                /* commit('SET_SORTED_PRODUCTS', sortedProducts) */
+                commit('SET_FILTERED_PRODUCTS', sortedProducts)
             }
         }
         

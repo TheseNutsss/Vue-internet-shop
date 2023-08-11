@@ -1,4 +1,5 @@
 <script>
+import {mapActions, mapMutations, mapState} from "vuex"
 export default {
     name: 'my-sort',
     data () {
@@ -6,6 +7,12 @@ export default {
             isSortOpen: false,
             sortCriteria: "default",
         }
+    },
+    computed: {
+        ...mapState({
+            filteredProducts: state => state.filters.filteredProducts,
+            sortOption: state => state.sort.sortOption
+        })
     },
     mounted(){
         document.addEventListener('click', (e)=> {
@@ -16,18 +23,17 @@ export default {
     },
     watch: {
         sortCriteria(){
-            this.$store.dispatch('SORT_PRODUCTS', this.sortCriteria)  
+            this.SET_SORT_OPTION(this.sortCriteria)
+            this.SORT_PRODUCTS(this.sortCriteria)
         },
         $route(){
             document.querySelector(".choosed-sort-option").innerHTML = "По умолчанию"
             this.sortCriteria = "default"
         },
-        '$store.state.filteredProducts'(){
-            !this.$store.state.filteredProducts.length && this.$store.state.sortedProducts ? this.$store.dispatch('SORT_PRODUCTS', this.sortCriteria) : ''
-            this.$store.state.filteredProducts.length && this.$store.state.sortedProducts ? this.$store.dispatch('SORT_PRODUCTS', this.sortCriteria) : ''
-        }
     },
     methods: {
+        ...mapActions(['SORT_PRODUCTS']),
+        ...mapMutations(['SET_SORT_OPTION']),
         showSortOptions(event){
             this.isSortOpen = !this.isSortOpen
             if(event.target.tagName == "LI"){

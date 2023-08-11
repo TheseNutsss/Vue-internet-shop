@@ -1,4 +1,5 @@
 <script>
+import { mapState, mapMutations, mapActions } from "vuex"
 export default {
   name: 'my-filter',
   data() {
@@ -9,156 +10,217 @@ export default {
       minPrice: null,
       maxPrice: null,
       isMobileFiltersOpen: false,
+      filterCategory: [],
+      priceSliderMin: null,
+      priceSliderMax: null,
+      isLoadingFilters: false,
     }
   },
+  computed: {
+    ...mapState({
+      products: state => state.products,
+      categories: state => state.categories,
+      filterOptions: state => state.filters.filterOptions,
+      filteredProducts: state => state.filters.filteredProducts,
+      categoriesProducts: state => state.filters.categoriesProducts,
+      usedFilter: state => state.filters.usedFilter,
+      showedProducts: state => state.showedProducts,
+      sortOption: state => state.sort.sortOption,
+    })
+  },
   methods: {
-    deleteUsedFilters(){
-      this.$store.commit('SET_FILTERED_PRODUCTS', [])
-      this.$store.commit('SET_FILTER', {category: [], subcategory: [], priceFrom: null, priceTo: null})
+    ...mapMutations(['SET_FILTER', 'SET_FILTERED_PRODUCTS', 'SET_USED_FILTER', 'setProducts', 'showProducts']),
+    ...mapActions(['filterProducts', 'SORT_PRODUCTS', 'productList', 'catalog']),
+    async deleteUsedFilters(){
+      this.subcategoriesList = []
+      await this.SET_FILTER({category: [], subcategory: [], priceFrom: null, priceTo: null})
       const checkboxes = document.querySelectorAll('input[type="checkbox"]')
       checkboxes.forEach(checkbox=>{
         if(checkbox.checked){
           checkbox.checked = !checkbox.checked
         }
       })
+
+      this.setValuesForFilters()
+
+      
     },
-    setValuesForFilters(){
-      const priceList = this.$store.state.showedProducts.map(product=> product.price)
-      this.$store.state.products.map(product=>!this.categoriesList.find(category=> category == product.categoryFilter) ? this.categoriesList.push(product.categoryFilter) : '')
-      this.$store.state.products.map(product=>product.hasOwnProperty('subcategoryFilter')? (!this.subcategoriesList.find(subcategory=> subcategory == product.subcategoryFilter) ? this.subcategoriesList.push(product.subcategoryFilter) : '') : '')
+    async setValuesForFilters(){
+      console.log('setValuesForFilters')
+      this.isLoadingFilters = !this.isLoadingFilters
+      let priceList = this.products.filter(product=> {
+        if(Object.values(this.filterOptions.subcategory).length){
+          if(product.hasOwnProperty('subcategory')){
+            if(this.filterOptions.subcategory.includes(product.subcategory)){
+              product.price
+            }
+          }
+        } else if(Object.values(this.filterOptions.category).length){
+          if(this.filterOptions.category.includes(product.categoryFilter)){
+            product.price
+          }
+        }
+      })
+      if(!priceList.length){
+        priceList = this.categoriesProducts.map(product => product.price)
+      }
+      console.log('priceList', priceList)
+      this.products.map(product=>!this.categoriesList.find(category=> category == product.categoryFilter) ? this.categoriesList.push(product.categoryFilter) : '')
       this.minPrice = Math.min(...priceList)
       this.maxPrice = Math.max(...priceList)
+      setTimeout(()=>{
+        this.priceSliderMin = this.minPrice
+        this.priceSliderMax =  this.maxPrice
+        this.isLoadingFilters = !this.isLoadingFilters
+      }, 100)
+      this.$refs.filterInputMin.setAttribute('min', this.minPrice)
+      this.$refs.filterInputMax.setAttribute('max', this.maxPrice)
+      this.$refs.filterInputMin.value = this.minPrice
+      this.$refs.filterInputMax.value = this.maxPrice
+      const progress = this.$refs.progress
+      progress.style.cssText = "left: 0; right: 0;"
     },
-    priceFilterSliderRange(e){
+    slideOne(){
+      console.log('slideOne')
+      const inputMin = this.$refs.rangeMin
+      const inputMax = this.$refs.rangeMax
+      const numberInputMin = this.$refs.filterInputMin
+      if(parseInt(inputMax.value) - parseInt(inputMin.value) < this.priceGap){
+        inputMin.value = parseInt(inputMax.value) - this.priceGap
+      } else {
+        numberInputMin.value = inputMin.value
+        this.fillColor()
+      }
+    },
+    slideTwo(){
+      console.log('slideOne')
+      const inputMin = this.$refs.rangeMin
+      const inputMax = this.$refs.rangeMax
+      const numberInputMax = this.$refs.filterInputMax
+      if(parseInt(inputMax.value) - parseInt(inputMin.value) < this.priceGap){
+        inputMax.value = parseInt(inputMin.value) + this.priceGap
+      } else {
+        numberInputMax.value = inputMax.value
+        this.fillColor()
+      }
+      
+    },
+    fillColor(){
+      const progress = this.$refs.progress
+      const inputMin = this.$refs.rangeMin
+      const inputMax = this.$refs.rangeMax
+      progress.style.left = ((inputMin.value - inputMin.min) * 100) / (inputMin.max - inputMin.min) + "%"
+      progress.style.right = ((inputMin.max - inputMax.value) * 100) / (inputMax.max - inputMax.min) + "%"
+    },
+    priceFilterInput(e){
+      console.log('priceFilterInput')
       const inputMin = document.querySelector('.range-min')
       const inputMax = document.querySelector('.range-max')
       const priceMin = document.querySelector('input[name="priceFrom"]')
       const priceMax = document.querySelector('input[name="priceTo"]')
-      const inputMinValue = parseInt(inputMin.value)
-      const inputMaxValue = parseInt(inputMax.value)
-      const progress = document.querySelector('.filter-price-slider-progress')
-      if(!e){
-        progress.style.left = 0
-        progress.style.right = 0
-      }
-      if(inputMaxValue - inputMinValue < this.priceGap){
-        if(e){
-          if(e.target.className === 'range-min'){
-            inputMin.value = inputMaxValue - this.priceGap
-          } else {
-            inputMax.value = inputMinValue + this.priceGap
-          }
+      const inputMinValue = parseInt(priceMin.value)
+      const inputMaxValue = parseInt(priceMax.value)
+      const progress = this.$refs.progress
+      if((inputMaxValue - inputMinValue >= this.priceGap) && (inputMinValue >= this.minPrice) && (inputMaxValue <= this.maxPrice)){
+        if(e.target.classList.contains('input-min')){
+          inputMin.value = inputMinValue
+          progress.style.left = ((inputMinValue - inputMin.min) * 100) / (inputMin.max - inputMin.min) + "%"
+        } else {
+          inputMax.value = inputMaxValue
+          progress.style.right = ((inputMin.max - inputMaxValue) * 100) / (inputMax.max - inputMax.min) + "%"
         }
-      } else {
-        priceMin.value = inputMinValue
-        priceMax.value = inputMaxValue
-        progress.style.left = ((inputMinValue - inputMin.min) * 100) / (inputMin.max - inputMin.min) + "%"
-        progress.style.right = ((inputMin.max - inputMaxValue) * 100) / (inputMax.max - inputMax.min) + "%"
-      }
-    },
-    priceFilterInput(e){
-    const inputMin = document.querySelector('.range-min')
-    const inputMax = document.querySelector('.range-max')
-    const priceMin = document.querySelector('input[name="priceFrom"]')
-    const priceMax = document.querySelector('input[name="priceTo"]')
-    const rangeInputMinValue = parseInt(inputMin.value)
-    const rangeInputMaxValue = parseInt(inputMax.value)
-    const inputMinValue = parseInt(priceMin.value)
-    const inputMaxValue = parseInt(priceMax.value)
-    const progress = document.querySelector('.filter-price-slider-progress')
-    if((inputMaxValue - inputMinValue >= this.priceGap) && (inputMinValue >= this.minPrice) && (inputMaxValue <= this.maxPrice)){
-          if(e.target.classList.contains('input-min')){
-            inputMin.value = inputMinValue
-            progress.style.left = ((inputMinValue - inputMin.min) * 100) / (inputMin.max - inputMin.min) + "%"
-          } else {
-            inputMax.value = inputMaxValue
-            progress.style.right = ((inputMin.max - inputMaxValue) * 100) / (inputMax.max - inputMax.min) + "%"
-          }
       }
   },
   handleFilterCategory(e){
     if(e.target.checked){
-      console.log("checked")
-      console.log(e.target.value)
-      if(!this.$store.state.filter.category.includes(e.target.value)){
-        const filter = this.$store.state.filter
-        filter.category.push(e.target.value)
-        console.log("filterArr", filter)
-        this.$store.commit('SET_FILTER', filter)
-
-      }
+      const filter = this.filterOptions
+      filter.category.push(e.target.value)
+      console.log("filterArr", filter)
+      this.SET_FILTER(filter)
+      this.filterCategory.push(e.target.value)
+      this.showSubcategory(e.target.value)
     } else {
-      console.log("unchecked")
-       if(this.$store.state.filter.category.includes(e.target.value)){
-        const filter = this.$store.state.filter
-        filter.category.splice(filter.category.findIndex(category=> category == e.target.value), 1)
-        this.$store.commit('SET_FILTER', filter)
-       }
+      const filter = this.filterOptions
+      filter.category.splice(filter.category.findIndex(category=> category == e.target.value), 1)
+      this.SET_FILTER(filter)
+      const indexToDelete = this.filterCategory.findIndex(category => category == e.target.value)
+      this.filterCategory.splice(indexToDelete, 1)
+      this.removeSubcategory(e.target.value)
     }
   }, 
   handleFilterSubcategory(e){
     if(e.target.checked){
-      console.log("checked")
-      console.log(e.target.value)
-      if(!this.$store.state.filter.subcategory.includes(e.target.value)){
-        const filter = this.$store.state.filter
+      if(!this.filterOptions.subcategory.includes(e.target.value)){
+        const filter = this.filterOptions
         filter.subcategory.push(e.target.value)
-        this.$store.commit('SET_FILTER', filter)
+        this.SET_FILTER(filter)
       }
     } else {
-      console.log("unchecked")
-       if(this.$store.state.filter.subcategory.includes(e.target.value)){
-        const filter = this.$store.state.filter
+      if(this.filterOptions.subcategory.includes(e.target.value)){
+        const filter = this.filterOptions
         filter.subcategory.splice(filter.subcategory.findIndex(subcategory=> subcategory == e.target.value), 1)
-        this.$store.commit('SET_FILTER', filter)
-       }
+        this.SET_FILTER(filter)
+      }
     }
   },
   handleFilterPrice(){
+    console.log('handleFilterPrice')
     if(document.querySelector('input[name="priceFrom"]').value >= this.minPrice || document.querySelector('input[name="priceTo"]').value <= this.maxPrice){
       console.log("handleFilterPrice")
-      const filter = this.$store.state.filter
+      const filter = this.filterOptions
       filter.priceFrom = document.querySelector('input[name="priceFrom"]').value
       filter.priceTo = document.querySelector('input[name="priceTo"]').value
-      this.$store.commit('SET_FILTER', filter)
+      this.SET_FILTER(filter)
     }
   },
   toggleMobileFilters(){
     this.isMobileFiltersOpen = !this.isMobileFiltersOpen
+  },
+  showSubcategory(category){
+    if(this.categories[category].length){
+      this.categories[category].forEach(subcategory => this.subcategoriesList.push(subcategory))
+    }
+  },
+  removeSubcategory(category){
+    console.log(category)
+    if(this.categories[category].length){
+      this.categories[category].forEach(subcategory => this.subcategoriesList.splice(this.subcategoriesList.findIndex(subcategoryItem => subcategoryItem == subcategory), 1))
+    }
   }
 },
-  
   watch: {
     isMobileFiltersOpen(){
       this.isMobileFiltersOpen ? document.body.classList.add('no-scroll') : document.body.classList.remove('no-scroll')
     },
     $route(){
-      this.$store.commit('SET_FILTERED_PRODUCTS', [])
-      this.setValuesForFilters()
+      this.deleteUsedFilters()
     },
-    '$store.state.sortedProducts'(){
-      console.log('sortedProducts')
-      this.$store.state.sortedProducts.length ? this.$store.commit('showProducts', this.$store.state.sortedProducts) : this.$store.state.filteredProducts.length ? this.$store.commit('showProducts', this.$store.state.filteredProducts) : this.$store.commit('showProducts', this.$store.state.showedProducts)
-    },
-    '$store.state.filteredProducts'(){
-      console.log('filteredProducts')
-      this.$store.state.sortedProducts.length ? this.$store.commit('showProducts', this.$store.state.sortedProducts) : this.$store.state.filteredProducts.length ? this.$store.commit('showProducts', this.$store.state.filteredProducts) : this.$store.commit('showProducts', this.$store.state.showedProducts)
-    },
-    '$store.state.showedProducts'(){
-      console.log('showedProducts')
-      !this.$store.state.filteredProducts.length && !this.$store.state.sortedProducts.length ? this.$store.commit('showProducts', this.$store.state.showedProducts) : ''
-    },
-    '$store.state.filter': {
-      handler(){
-        this.$store.dispatch('filter', this.$store.state.filter)
+    filterOptions: {
+      async handler(){
+        console.log('filterOptions')
+        if(Object.values(this.filterOptions).join('')== ""){
+          if(this.$route.params.hasOwnProperty('catalog')){
+            this.catalog()
+          } else {
+            this.productList(this.$route.params)
+          }
+        } else if ((this.filterOptions.priceFrom || this.filterOptions.priceTo) && (!this.filterOptions.category.length && !this.filterOptions.subcategory.length) ) {
+          this.filterProducts()
+        } else {
+          await this.filterProducts()
+          await this.setValuesForFilters()
+        }
+        if(this.sortOption !== "default"){
+          this.SORT_PRODUCTS(this.sortOption)
+        }
       },
       deep: true
     },
   },
   mounted(){
-      this.$store.commit('showProducts', this.$store.state.showedProducts)
-      this.setValuesForFilters()
-      this.priceFilterSliderRange()
+    this.setValuesForFilters()
+    /* this.slideOne()
+    this.slideTwo() */
   }
 }
 </script>
@@ -170,26 +232,28 @@ export default {
   <div class="filter-icon-wrapper" @click.stop="toggleMobileFilters"><img src="@/assets/filter-icon.png"/></div>
   <div class="filter-area-wrapper" :class="{'mobile-filters-bar' : isMobileFiltersOpen}">
     <span class="close-mobile-filters-icon" @click.stop="toggleMobileFilters">✕</span>
-    <div class="usedFilters" @click.stop="deleteUsedFilters" v-if="$store.state.filteredProducts.length"><my-button>Cбросить все фильтры</my-button></div>
+    <div class="usedFilters" @click.stop="deleteUsedFilters" v-if="Object.values(filterOptions).join('')!== ''"><my-button>Cбросить все фильтры</my-button></div>
     <h2>Фильтры</h2>
     <div class="filter-price">
-          <div class="filter-input-price-wrapper">
-            <input class="filter-input-price input-min" type="number" name="priceFrom" @change="handleFilterPrice" @input="priceFilterInput" :value="minPrice" :min="minPrice"/>
-              <div class="input-divider">-</div>
-            <input class="filter-input-price input-max" type="number" name="priceTo" @change="handleFilterPrice" @input="priceFilterInput" :value="maxPrice" :max="maxPrice"/>
-            <my-button @click="handleFilterPrice">ОК</my-button>
+      <div class="price-filter-overlay" v-if="isLoadingFilters"><div class="loader"></div></div>
+      <div class="filter-input-price-wrapper">
+        <input class="filter-input-price input-min" type="number" ref="filterInputMin" name="priceFrom" @change="handleFilterPrice" @input="priceFilterInput"/>
+          <div class="input-divider">-</div>
+        <input class="filter-input-price input-max" type="number" ref="filterInputMax" name="priceTo" @change="handleFilterPrice" @input="priceFilterInput"/>
+        <my-button @click.prevent="handleFilterPrice">ОК</my-button>
+      </div>
+      <div class="filter-price-range-wrapper">
+          <div class="filter-price-slider">
+            <div class="filter-price-slider-progress" ref="progress"></div>
           </div>
-        <div class="filter-price-range-wrapper">
-            <div class="filter-price-slider">
-              <div class="filter-price-slider-progress"></div>
-            </div>
-            <div class="price-toggle-wrapper">
-              <input name="priceFromRange" type="range" class="ranges-filter range-min" :min="minPrice" :max="maxPrice" :value="minPrice" @input="priceFilterSliderRange"/>
-              <input name="priceToRange" type="range" class=" ranges-filter range-max" :min="minPrice" :max="maxPrice" :value="maxPrice" @input="priceFilterSliderRange"/>
-            </div>
-        </div>
+          <div class="price-toggle-wrapper">
+            <input name="priceFromRange" type="range" ref="rangeMin" class="ranges-filter range-min" :min="minPrice" :max="maxPrice" v-model="priceSliderMin" @input="slideOne"/>
+            <input name="priceToRange" type="range" ref="rangeMax" class="ranges-filter range-max" :min="minPrice" :max="maxPrice" v-model="priceSliderMax" @input="slideTwo"/>
+          </div>
+      </div>
     </div>
     <div class="filter-categories-wrapper">
+      <div class="price-filter-overlay" v-if="isLoadingFilters"><div class="loader"></div></div>
       <div class="categories">
         <h3>Категории</h3>
         <ul class="filter-category-list">
@@ -202,7 +266,8 @@ export default {
         </ul>
       </div>
     </div>
-    <div class="filter-subcategories-wrapper">
+    <div class="filter-subcategories-wrapper" v-if="subcategoriesList.length">
+      <div class="price-filter-overlay" v-if="isLoadingFilters"><div class="loader"></div></div>
       <div class="subcategories">
         <h3>Подкатегории</h3>
         <ul class="filter-subcategory-list">
@@ -294,6 +359,7 @@ export default {
   align-items: center;
   padding: 16px;
   margin-bottom: 10px;
+  position: relative;
 }
 .filter-price-slider{
   height: 4px;
@@ -355,6 +421,7 @@ input[type="range"]::-moz-slider-thumb{
   padding: 16px;
   justify-content: center;
   margin-bottom: 10px;
+  position: relative;
 }
 .categories, .subcategories{
   display: flex;
@@ -372,6 +439,9 @@ input[type="range"]::-moz-slider-thumb{
 .close-mobile-filters-icon{
   display: none;
   z-index: 7;
+}
+.usedFilters{
+  padding: 5px;
 }
 @media (max-width: 1200px){
   .filter-area-wrapper{
@@ -416,5 +486,38 @@ input[type="range"]::-moz-slider-thumb{
     font-size: 25px;
     margin-right: 10px;
   }
+}
+.price-filter-overlay{
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index:100;
+  left: 0;
+  top: 0;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.loader {
+  border: 2px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid #FCCC26;
+  width: 30px;
+  height: 30px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
