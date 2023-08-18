@@ -26,12 +26,6 @@ export default createStore({
       },
   },
   mutations: {
-    /* setProducts(state, products){
-      state.showedProducts = products 
-    },
-    showProducts(state, products){
-      state.productsToShow = products
-    } */
   },
   actions: {
  

@@ -47,6 +47,7 @@ export default {
             console.log("catalog")
             commit('SET_FILTERED_PRODUCTS', rootState.products)
             commit('SET_ORIGINAL_ORDER', rootState.products)
+            commit('SET_CATEGORIES_PRODUCTS', rootState.products)
         }
     }
 }
