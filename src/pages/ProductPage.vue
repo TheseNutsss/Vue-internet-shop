@@ -15,7 +15,8 @@ export default {
 
 <template>
 <div class="container">
-  <div class="productPage-wrapper" v-for="product in $store.state.showedProducts">
+  <template v-for="product in $store.state.products">
+  <div class="productPage-wrapper" v-if="product.id == $route.params.id">
     <div class="imgArea-wrapper"><img :src="product.imgMain"/></div>
     <div class="productDetails-wrapper">
       <div class="nameAndArticul-wrapper">
@@ -62,7 +63,8 @@ export default {
         </tabs>
       </div>
     </div>
-  </div>  
+  </div> 
+  </template>
 </div>
 </template>
 
